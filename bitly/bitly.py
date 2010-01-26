@@ -3,12 +3,21 @@
 import os
 import sys
 import urllib
-import optparse
-from ConfigParser import ConfigParser
 import simplejson as json
 
 API_URL = 'http://api.bit.ly'
 API_VERSION = '2.0.1'
+
+class APIError (Exception):
+    def __init__ (self, code, message, result=None):
+        super(APIError, self).__init__()
+        self.errorCode = code
+        self.errorMessage = message
+        self.result = result
+
+    def __str__ (self):
+        return 'Bit.ly API error: %d: %s' % (self.errorCode,
+                self.errorMessage)
 
 class BitLy (object):
     api_version = API_VERSION
@@ -16,6 +25,11 @@ class BitLy (object):
     def __init__ (self, api_user, api_key):
         self.api_user = api_user
         self.api_key = api_key
+
+        # check credentials
+        res = self.errors()
+        if res['errorCode'] != 0:
+            raise APIError(res['errorCode'], res['errorMessage'])
 
     def __getattr__ (self, f):
         def _ (**kwargs):
@@ -31,45 +45,29 @@ class BitLy (object):
             query = urllib.urlencode(d)
 
             fd = urllib.urlopen(url, query)
-            return json.loads(fd.read())
+            res = json.loads(fd.read())
+
+            if res['errorCode'] != 0:
+                raise APIError(
+                        res['errorCode'],
+                        res['errorMessage'],
+                        res)
+            return res
 
         return _
 
-def parse_args():
-    p = optparse.OptionParser()
-    p.add_option('-f', '--config', default='~/.bitly')
-    return p.parse_args()
-
 def main():
-    opts, args = parse_args()
+    from ConfigParser import ConfigParser
+    cf = ConfigParser()
+    cf.read(os.path.expanduser('~/.bitly'))
 
-    config = ConfigParser()
-    config.read(os.path.expanduser(opts.config))
-
-    if not config.has_section('bitly'):
-        print >>sys.stderr, 'Failed to read bit.ly API configuration ' \
-                'from %s.' % opts.config
-        sys.exit(1)
-
-    bitly = BitLy(
-            config.get('bitly', 'api_user'),
-            config.get('bitly', 'api_key'),
+    api = BitLy(
+            cf.get('bitly', 'api_user'),
+            cf.get('bitly', 'api_key')
             )
 
-    if args:
-        url = args[0]
-    else:
-        url = sys.stdin.readline().strip()
-
-    res = bitly.shorten(longUrl=url)
-
-    if 'results' in res and url in res['results'] \
-            and 'shortUrl' in res['results'][url]:
-        print res['results'][url]['shortUrl']
-    else:
-        print >>sys.stderr, 'ERROR: Failed to generate short URL.'
-        print url
+    return api
 
 if __name__ == '__main__':
-    main()
+    api = main()
 
