@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+import sys
 import optparse
 from ConfigParser import ConfigParser
 
