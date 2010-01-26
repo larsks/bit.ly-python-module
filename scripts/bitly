@@ -1,0 +1,46 @@
+#!/usr/bin/python
+
+import os
+import optparse
+from ConfigParser import ConfigParser
+
+import bitly
+
+def parse_args():
+    p = optparse.OptionParser()
+    p.add_option('-f', '--config', default='~/.bitly')
+    return p.parse_args()
+
+def main():
+    opts, args = parse_args()
+
+    config = ConfigParser()
+    config.read(os.path.expanduser(opts.config))
+
+    if not config.has_section('bitly'):
+        print >>sys.stderr, 'Failed to read bit.ly API configuration ' \
+                'from %s.' % opts.config
+        sys.exit(1)
+
+    api = bitly.BitLy(
+            config.get('bitly', 'api_user'),
+            config.get('bitly', 'api_key'),
+            )
+
+    if args:
+        url = args[0]
+    else:
+        url = sys.stdin.readline().strip()
+
+    res = api.shorten(longUrl=url)
+
+    if 'results' in res and url in res['results'] \
+            and 'shortUrl' in res['results'][url]:
+        print res['results'][url]['shortUrl']
+    else:
+        print >>sys.stderr, 'ERROR: Failed to generate short URL.'
+        print url
+
+if __name__ == '__main__':
+    main()
+
