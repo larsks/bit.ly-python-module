@@ -5,8 +5,8 @@ Python bit.ly wrapper
 This is a thin Python wrapper for the `bit.ly api`.  Basic usage looks like
 this::
 
-  >>> import bitly
-  >>> b = bitly.BitLy(api_user, api_key)
+  >>> import bitlyapi
+  >>> b = bitlyapi.BitLy(api_user, api_key)
   >>> url = 'http://www.google.com/'
   >>> res = b.shorten(longUrl=url)
   >>> 
