@@ -34,13 +34,7 @@ def main():
         url = sys.stdin.readline().strip()
 
     res = api.shorten(longUrl=url)
-
-    if 'results' in res and url in res['results'] \
-            and 'shortUrl' in res['results'][url]:
-        print res['results'][url]['shortUrl']
-    else:
-        print >>sys.stderr, 'ERROR: Failed to generate short URL.'
-        print url
+    print res[url]['shortUrl']
 
 if __name__ == '__main__':
     main()
