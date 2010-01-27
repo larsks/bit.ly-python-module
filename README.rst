@@ -10,7 +10,7 @@ this::
   >>> url = 'http://www.google.com/'
   >>> res = b.shorten(longUrl=url)
   >>> 
-  >>> print res['results'][url]['shortUrl']
+  >>> print res[url]['shortUrl']
   http://bit.ly/6Hwstb
 
 The return from any method call is a dict containing the results of
@@ -18,14 +18,11 @@ decoding the JSON returned from bit.ly.  For example::
 
   >>> import pprint
   >>> pprint.pprint(res)
-  {'errorCode': 0,
-   'errorMessage': '',
-   'results': {'http://www.google.com/': {'hash': '2V6CFi',
-                                          'shortCNAMEUrl': 'http://bit.ly/6Hwstb',
-                                          'shortKeywordUrl': '',
-                                          'shortUrl': 'http://bit.ly/6Hwstb',
-                                          'userHash': '6Hwstb'}},
-   'statusCode': 'OK'}
+  {'http://www.google.com/': {'hash': '2V6CFi',
+                              'shortCNAMEUrl': 'http://bit.ly/6Hwstb',
+                              'shortKeywordUrl': '',
+                              'shortUrl': 'http://bit.ly/6Hwstb',
+                              'userHash': '6Hwstb'}}
 
 You can supply arbitrary keywords to method calls and they will be passed
 to the bit.ly REST API::
